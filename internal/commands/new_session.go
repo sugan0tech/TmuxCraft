@@ -1,35 +1,40 @@
+// tmuxcraft
+// Copyright (c) 2024 sugan0tech
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
 package commands
 
 import (
-    "fmt"
-    "os"
-    "os/exec"
+  "fmt"
+  "os"
+  "os/exec"
 )
 
 func NewSession() {
-    fmt.Println("Creating a new session layout...")
+  fmt.Println("Creating a new session layout...")
 
-    sessionFile := "layouts/new_session.yaml"
-    file, err := os.Create(sessionFile)
-    if err != nil {
-        fmt.Println("Error creating session file:", err)
-        return
-    }
-    file.Close()
+  sessionFile := "layouts/new_session.yaml"
+  file, err := os.Create(sessionFile)
+  if err != nil {
+    fmt.Println("Error creating session file:", err)
+    return
+  }
+  file.Close()
 
-    editor := os.Getenv("EDITOR")
-    if editor == "" {
-        editor = "vi"
-    }
+  editor := os.Getenv("EDITOR")
+  if editor == "" {
+    editor = "vi"
+  }
 
-    cmd := exec.Command(editor, sessionFile)
-    cmd.Stdin = os.Stdin
-    cmd.Stdout = os.Stdout
-    cmd.Stderr = os.Stderr
+  cmd := exec.Command(editor, sessionFile)
+  cmd.Stdin = os.Stdin
+  cmd.Stdout = os.Stdout
+  cmd.Stderr = os.Stderr
 
-    err = cmd.Run()
-    if err != nil {
-        fmt.Println("Error opening editor:", err)
-    }
+  err = cmd.Run()
+  if err != nil {
+    fmt.Println("Error opening editor:", err)
+  }
 }
 
