@@ -1,0 +1,13 @@
+session_name: example
+windows:
+  - name: editor
+    panes:
+      - command: vim
+        percentage: 50
+      - command: bash
+        percentage: 50
+  - name: server
+    panes:
+      - command: go run main.go
+        percentage: 100
+
