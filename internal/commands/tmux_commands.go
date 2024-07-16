@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/sugan0tech/tmuxcraft/internal/config"
 )
@@ -36,7 +37,14 @@ func SetCurrentPane(pane int) {
 }
 
 func ExecCommand(cmdStr string) {
-  cmd := exec.Command("sh", "-c", cmdStr)
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		shell = "bin/sh"
+	}
+
+  cmd := exec.Command(shell, "-c", cmdStr)
+  fmt.Println(cmdStr)
+
   if strings.Contains(cmdStr, "attach-session"){
     cmd.Stdin = os.Stdin
     cmd.Stdout = os.Stdout
@@ -46,6 +54,15 @@ func ExecCommand(cmdStr string) {
       log.Fatalf("Failed to execute command: %v", err)
     }
 
+  }
+  if strings.Contains(cmdStr, "send-keys") {
+    time.Sleep(100*time.Millisecond)
+    cmdSend := exec.Command(shell, "-c", cmdStr)
+    output, err := cmdSend.CombinedOutput()
+    if err != nil {
+      fmt.Printf("Failed to execute send keys command: %v\nOutput: %s\n", err, string(output))
+      return
+    }
   }else {
     err := cmd.Run()
     if err != nil {
@@ -99,14 +116,15 @@ func TRenameWindow(name string, id int) {
 }
 
 func TAttachToSession() {
-	cmdStr := fmt.Sprintf("tmux attach-session -t %s", SESSION_NAME)
+	cmdStr := fmt.Sprintf("tmux -u attach-session -t %s", SESSION_NAME)
 	ExecCommand(cmdStr)
 }
 
 func TRunCommand(command string, window string, pane int) {
-	args := strings.Split(command, " ")
-	cmdStr := fmt.Sprintf("tmux send-keys -t %s:%s.%d %s C-m", SESSION_NAME, window, pane, fmt.Sprintf("\"%s\"", strings.Join(args, " ")))
-	ExecCommand(cmdStr)
+
+  args := strings.Split(command, " ")
+  cmdStr := fmt.Sprintf("tmux send-keys -t %s:%s.%d %s C-m", SESSION_NAME, window, pane, fmt.Sprintf("\"%s\"", strings.Join(args, " ")))
+  ExecCommand(cmdStr)
 }
 
 

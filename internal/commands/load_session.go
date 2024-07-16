@@ -28,6 +28,10 @@ func LoadSession(templatePath string) {
     if windInd == 0 {
       TRenameWindow(window.Name, windInd + 1)
       SetCurrentWindow(window.Name, windInd + 1)
+      // window based command to be executed in first pane
+      if window.Command != "" {
+        TRunCommand(window.Command, window.Name, 1)
+      }
     } else {
 		  TNewWindow(window, windInd + 1)
     }
