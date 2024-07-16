@@ -6,16 +6,23 @@
 package commands
 
 import (
-  "fmt"
-  "os"
-  "os/exec"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 )
 
-func NewSession() {
-  fmt.Println("Creating a new session layout...")
+func NewSession(sessionName string) {
+  homeDir, err := os.UserHomeDir()
+  if err != nil {
+    fmt.Println(sessionName)
+    log.Fatal("error getting home directory:", err)
+  }
 
-  sessionFile := "layouts/new_session.yaml"
+  sessionFile := filepath.Join(homeDir, ".config", "tmuxcraft", "layouts", fmt.Sprintf("%s.yaml", sessionName))
   file, err := os.Create(sessionFile)
+
   if err != nil {
     fmt.Println("Error creating session file:", err)
     return
@@ -23,6 +30,7 @@ func NewSession() {
   file.Close()
 
   editor := os.Getenv("EDITOR")
+
   if editor == "" {
     editor = "vi"
   }

@@ -16,7 +16,7 @@ import (
 
 type Pane struct {
   Command    string `yaml:"command"`
-  Size      int    `yaml:"percentage"`
+  Size      int    `yaml:"size"`
   Split string  `yaml:"split"`
 }
 

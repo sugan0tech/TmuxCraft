@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"path/filepath"
+	"strings"
+
+	"github.com/sugan0tech/tmuxcraft/internal/config"
 )
 
 var (
-	ROOT         string
-	SESSION_NAME string
+	ROOT          string
+	SESSION_NAME  string
 	CURRENT_WINDOW string
+	CURRENT_WINDOW_ID int
 	CURRENT_PANE  int
 )
 
@@ -22,58 +25,74 @@ func SessionName(name string) {
 	SESSION_NAME = name
 }
 
-func SetCurrentWindow(name string) {
+func SetCurrentWindow(name string, id int) {
 	CURRENT_WINDOW = name
+	CURRENT_WINDOW_ID = id
 }
 
 func SetCurrentPane(pane int) {
 	CURRENT_PANE = pane
 }
 
-func SelectWindow(window string) {
-	cmd := exec.Command("tmux", "select-window", "-t", fmt.Sprintf("%s:%s", SESSION_NAME, window))
-	cmd.Run()
-}
-
-func NewSessionTest() {
-	dir, err := filepath.Abs(ROOT)
-	if err != nil {
-		log.Fatalf("Failed to get absolute path: %v", err)
+func ExecCommand(cmdStr string) {
+	cmd := exec.Command("sh", "-c", cmdStr)
+  fmt.Println(cmdStr)
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
 	}
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", SESSION_NAME, "-c", dir)
-	cmd.Run()
 }
 
-func NewWindow(name string) {
-	cmd := exec.Command("tmux", "new-window", "-t", SESSION_NAME, "-c", ROOT, "-n", name)
-	cmd.Run()
-	SetCurrentWindow(name)
+func SelectWindow(window string) {
+	cmdStr := fmt.Sprintf("tmux select-window -t %s:%s", SESSION_NAME, window)
+	ExecCommand(cmdStr)
 }
 
-func SplitVertical(size int) {
-	cmd := exec.Command("tmux", "split-window", "-t", fmt.Sprintf("%s:%s.%d", SESSION_NAME, CURRENT_WINDOW, CURRENT_PANE), "-c", ROOT, "-v", "-l", fmt.Sprintf("%d", size))
-	cmd.Run()
+func TNewSession(session config.SessionConfig) {
+	cmdStr := fmt.Sprintf("tmux new-session -d -s %s -c %s", session.SessionName, session.Path)
+	ExecCommand(cmdStr)
+}
+
+func TNewWindow(window config.Window, id int) {
+	currRoot := ROOT
+	if window.Path != "" {
+		currRoot = window.Path
+	}
+	cmdStr := fmt.Sprintf("tmux new-window -t %s -c %s -n %s", SESSION_NAME, currRoot, window.Name)
+	ExecCommand(cmdStr)
+
+	if window.Command != "" {
+		TRunCommand(window.Command, window.Name, 1)
+	}
+	// SetCurrentWindow(window.Name, id)
+}
+
+func TSplitVertical(pane config.Pane, index int) {
+	cmdStr := fmt.Sprintf("tmux split-window -t %s:%s.%d -c %s -v -l %d", SESSION_NAME, CURRENT_WINDOW, index+1, ROOT, pane.Size)
+	ExecCommand(cmdStr)
 	SetCurrentPane(CURRENT_PANE + 1)
 }
 
-func SplitHorizontal(size int) {
-	cmd := exec.Command("tmux", "split-window", "-t", fmt.Sprintf("%s:%s.%d", SESSION_NAME, CURRENT_WINDOW, CURRENT_PANE), "-c", ROOT, "-h", "-l", fmt.Sprintf("%d", size))
-	cmd.Run()
+func TSplitHorizontal(pane config.Pane, index int) {
+	CURRENT_PANE = index + 1
+	cmdStr := fmt.Sprintf("tmux split-window -t %s:%s.%d -c %s -h -l %d", SESSION_NAME, CURRENT_WINDOW, index+1, ROOT, pane.Size)
+	ExecCommand(cmdStr)
 	SetCurrentPane(CURRENT_PANE + 1)
 }
 
-func RenameWindow(name string) {
-	cmd := exec.Command("tmux", "rename-window", "-t", fmt.Sprintf("%s:%s", SESSION_NAME, CURRENT_WINDOW), name)
-	cmd.Run()
+//  todo: to be used to rename the default window
+func TRenameWindow(name string, id int) {
+	cmdStr := fmt.Sprintf("tmux rename-window -t %s:%s %s", SESSION_NAME, CURRENT_WINDOW, name)
+	ExecCommand(cmdStr)
 }
 
-func AttachToSession() {
-	cmd := exec.Command("tmux", "attach-session", "-t", SESSION_NAME)
-	cmd.Run()
+func TAttachToSession() {
+	cmdStr := fmt.Sprintf("tmux attach-session -t %s", SESSION_NAME)
+	ExecCommand(cmdStr)
 }
 
-func RunCommand(command string) {
-	cmd := exec.Command("tmux", "send-keys", "-t", fmt.Sprintf("%s:%s.%d", SESSION_NAME, CURRENT_WINDOW, CURRENT_PANE), command, "C-m")
-	cmd.Run()
+func TRunCommand(command string, window string, pane int) {
+	args := strings.Split(command, " ")
+	cmdStr := fmt.Sprintf("tmux send-keys -t %s:%s.%d %s C-m", SESSION_NAME, window, pane, strings.Join(args, " "))
+	ExecCommand(cmdStr)
 }
 
