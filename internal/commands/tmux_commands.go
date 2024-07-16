@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -35,11 +36,23 @@ func SetCurrentPane(pane int) {
 }
 
 func ExecCommand(cmdStr string) {
-	cmd := exec.Command("sh", "-c", cmdStr)
-  fmt.Println(cmdStr)
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("Failed to execute command: %v", err)
-	}
+  cmd := exec.Command("sh", "-c", cmdStr)
+  if strings.Contains(cmdStr, "attach-session"){
+    cmd.Stdin = os.Stdin
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    err := cmd.Run()
+    if err != nil {
+      log.Fatalf("Failed to execute command: %v", err)
+    }
+
+  }else {
+    err := cmd.Run()
+    if err != nil {
+      log.Fatalf("Failed to execute command: %v", err)
+    }
+
+  }
 }
 
 func SelectWindow(window string) {
@@ -92,7 +105,8 @@ func TAttachToSession() {
 
 func TRunCommand(command string, window string, pane int) {
 	args := strings.Split(command, " ")
-	cmdStr := fmt.Sprintf("tmux send-keys -t %s:%s.%d %s C-m", SESSION_NAME, window, pane, strings.Join(args, " "))
+	cmdStr := fmt.Sprintf("tmux send-keys -t %s:%s.%d %s C-m", SESSION_NAME, window, pane, fmt.Sprintf("\"%s\"", strings.Join(args, " ")))
 	ExecCommand(cmdStr)
 }
+
 
