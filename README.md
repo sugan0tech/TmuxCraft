@@ -55,6 +55,53 @@ To use Tmuxcraft, you can run the following commands:
 tmuxcraft <command> [<args>]
 ```
 
+Sample Config file
+```yaml
+session_name: test
+path: ~/Documents/GitHub/tmuxcraft
+windows:
+  - name: nvim
+    path: ~/Documents
+    command: nvim
+    panes:
+      - command: tty-clock -t
+        split: h
+        size: 20
+      - command: bash
+        size: 50
+        split: v
+  - name: resource
+    command: htop
+    panes: []
+  - name: test
+    panes: []
+```
+
+Executable ready to go, shell scripts. By default will be generated in pwd. Can be configured with `-O {path}` flag
+
+```sh 
+tmuxcraft -ls test -gs -O {path}
+```
+
+```sh 
+#!/bin/bash
+tmux new-session -d -s test -c ~/Documents/GitHub/tmuxcraft
+tmux rename-window -t test: nvim
+sleep 0.1
+tmux send-keys -t test:nvim.1 "nvim" C-m
+tmux split-window -t test:nvim.1 -c ~/Documents/GitHub/tmuxcraft -h -l 40
+sleep 0.1
+tmux send-keys -t test:nvim.2 "tty-clock -t" C-m
+tmux split-window -t test:nvim.2 -c ~/Documents/GitHub/tmuxcraft -v -l 20
+sleep 0.1
+tmux send-keys -t test:nvim.3 "bash" C-m
+tmux new-window -t test -c ~/Documents/GitHub/tmuxcraft -n resource
+sleep 0.1
+tmux send-keys -t test:resource.1 "htop" C-m
+tmux new-window -t test -c ~/Documents/GitHub/tmuxcraft -n test
+```
+
+
 ## Contributing
 
 We welcome contributions to Tmuxcraft! To contribute, please follow these steps:
