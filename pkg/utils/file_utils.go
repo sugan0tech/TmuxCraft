@@ -16,7 +16,7 @@ func GenerateTmuxScript(session *config.SessionConfig) string {
   for _, window := range session.Windows {
     scriptBuilder.WriteString(fmt.Sprintf("tmux new-window -t %s -n %s\n", session.SessionName, window.Name))
     for _, pane := range window.Panes {
-      scriptBuilder.WriteString(fmt.Sprintf("tmux split-window -t %s:%s -p %d -h\n", session.SessionName, window.Name, pane.Percentage))
+      scriptBuilder.WriteString(fmt.Sprintf("tmux split-window -t %s:%s -p %d -h\n", session.SessionName, window.Name, pane.Size))
       scriptBuilder.WriteString(fmt.Sprintf("tmux send-keys -t %s:%s '%s' C-m\n", session.SessionName, window.Name, pane.Command))
     }
   }

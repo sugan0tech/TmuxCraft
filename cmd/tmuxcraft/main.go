@@ -6,9 +6,10 @@
 package main
 
 import (
-  "flag"
+	"flag"
+	"fmt"
 
-  "github.com/sugan0tech/tmuxcraft/internal/commands"
+	"github.com/sugan0tech/tmuxcraft/internal/commands"
 )
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 
   switch {
   case *loadSession != "":
+    fmt.Println(loadSession)
     commands.LoadSession(*loadSession)
   case *list:
     commands.ListSessions()

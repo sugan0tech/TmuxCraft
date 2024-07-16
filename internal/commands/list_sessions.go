@@ -6,9 +6,10 @@
 package commands
 
 import (
-  "fmt"
-  "os"
-  "path/filepath"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 func ListSessions() {
@@ -18,11 +19,24 @@ func ListSessions() {
     return
   }
 
-  fmt.Println("Available sessions:")
+
+  var layouts = []string{}
+
   for _, file := range files {
     if filepath.Ext(file.Name()) == ".yaml" {
-      fmt.Println(file.Name())
+      filename := strings.Split(file.Name(), ".")[0]
+      layouts = append(layouts, filename)
     }
+  }
+
+  if len(layouts) > 0 {
+    fmt.Println("Available sessions layouts:")
+
+    for _, layout := range layouts {
+      fmt.Println(layout)
+    }
+  } else {
+    fmt.Println("No session layout found, add them under .config/tmuxcraft/layouts")
   }
 }
 

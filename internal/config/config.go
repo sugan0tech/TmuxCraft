@@ -6,28 +6,43 @@
 package config
 
 import (
-  "fmt"
-  "os"
-  "gopkg.in/yaml.v3"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Pane struct {
   Command    string `yaml:"command"`
-  Percentage int    `yaml:"percentage"`
+  Size      int    `yaml:"percentage"`
+  Split string  `yaml:"split"`
 }
 
 type Window struct {
   Name  string `yaml:"name"`
+  Path  string `yaml:"path"`
+  Command  string `yaml:"command"`
+  SelectPane int `yaml:"select_pane"`
   Panes []Pane `yaml:"panes"`
 }
 
 type SessionConfig struct {
   SessionName string   `yaml:"session_name"`
+  Path        string   `yaml:"path"`
   Windows     []Window `yaml:"windows"`
 }
 
 func LoadSessionConfig(sessionName string) (*SessionConfig, error) {
-  data, err := os.ReadFile(fmt.Sprintf("layouts/%s.yaml", sessionName))
+  homeDir, err := os.UserHomeDir()
+  if err != nil {
+    fmt.Println(sessionName)
+    log.Fatal("error getting home directory:", err)
+  }
+
+  filePath := filepath.Join(homeDir, ".config", "tmuxcraft", "layouts", fmt.Sprintf("%s.yaml", sessionName))
+  data, err := os.ReadFile(filePath)
   if err != nil {
     return nil, err
   }
@@ -40,4 +55,4 @@ func LoadSessionConfig(sessionName string) (*SessionConfig, error) {
 
   return &config, nil
 }
-
+ 

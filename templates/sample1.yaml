@@ -1,13 +1,19 @@
-session_name: example
+session_name: test
+path: ~/Documents/GitHub/tmuxcraft
 windows:
-  - name: editor
+  - name: nvim
+    path: ~/Documents
+    command: nvim
     panes:
-      - command: vim
-        percentage: 50
+      - command: tty-clock -t
+        split: h
+        size: 20
       - command: bash
-        percentage: 50
-  - name: server
-    panes:
-      - command: go run main.go
-        percentage: 100
+        size: 50
+        split: v
+  - name: resource
+    command: htop
+    panes: []
+  - name: test
+    panes: []
 
