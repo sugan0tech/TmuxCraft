@@ -7,7 +7,7 @@ import (
 	"github.com/sugan0tech/tmuxcraft/internal/config"
 )
 
-func LoadSession(templatePath string) {
+func LoadSession(templatePath string, generateShell bool, outputPath string) {
   session, err := config.LoadSessionConfig(templatePath)
   if err != nil {
     log.Println(err)
@@ -22,7 +22,7 @@ func LoadSession(templatePath string) {
 
   ProjectRoot(session.Path)
   SessionName(session.SessionName)
-  TNewSession(*session)
+  TNewSession(*session, generateShell, outputPath)
 
 	for windInd, window := range session.Windows {
     if windInd == 0 {

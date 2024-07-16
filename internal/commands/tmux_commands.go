@@ -1,3 +1,8 @@
+// tmuxcraft
+// Copyright (c) 2024 sugan0tech
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
 package commands
 
 import (
@@ -5,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -17,6 +23,9 @@ var (
 	CURRENT_WINDOW string
 	CURRENT_WINDOW_ID int
 	CURRENT_PANE  int
+  GENERATE_SHELL bool
+  SHELL_WRITE_PATH string
+  SHELL_OUT string
 )
 
 func ProjectRoot(root string) {
@@ -37,6 +46,10 @@ func SetCurrentPane(pane int) {
 }
 
 func ExecCommand(cmdStr string) {
+  if GENERATE_SHELL {
+    PushCommand(cmdStr)
+  }
+
 	shell := os.Getenv("SHELL")
 	if shell == "" {
 		shell = "bin/sh"
@@ -77,9 +90,33 @@ func SelectWindow(window string) {
 	ExecCommand(cmdStr)
 }
 
-func TNewSession(session config.SessionConfig) {
+func TNewSession(session config.SessionConfig, flag bool, path string) {
 	cmdStr := fmt.Sprintf("tmux new-session -d -s %s -c %s", session.SessionName, session.Path)
+  if flag {
+    Init()
+    GENERATE_SHELL = flag
+    if path != "" {
+      SHELL_WRITE_PATH, _ = toAbsolutePath(path)
+    }
+    cwd, err := os.Getwd()
+    if err != nil {
+      log.Println("Error in getting current working directory: ", err)
+    }
+    SHELL_WRITE_PATH = cwd
+  }
 	ExecCommand(cmdStr)
+}
+
+func toAbsolutePath(path string) (string, error) {
+	if strings.HasPrefix(path, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path = filepath.Join(homeDir, path[1:])
+	}
+
+	return filepath.Abs(path)
 }
 
 func TNewWindow(window config.Window, id int) {
@@ -117,6 +154,9 @@ func TRenameWindow(name string, id int) {
 
 func TAttachToSession() {
 	cmdStr := fmt.Sprintf("tmux -u attach-session -t %s", SESSION_NAME)
+  if GENERATE_SHELL {
+    GenerateShell(SESSION_NAME, SHELL_WRITE_PATH)
+  }
 	ExecCommand(cmdStr)
 }
 

@@ -6,23 +6,32 @@
 package commands
 
 import (
-  "fmt"
-  "os"
-
-  "github.com/sugan0tech/tmuxcraft/internal/config"
-  "github.com/sugan0tech/tmuxcraft/pkg/utils"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
-func GenerateShell(sessionName string) {
-  session, err := config.LoadSessionConfig(sessionName)
-  if err != nil {
-    fmt.Println("Error loading session:", err)
-    return
-  }
+var (
+  CONTENTS string
+  BUILDER strings.Builder
+)
 
-  scriptContent := utils.GenerateTmuxScript(session)
+func Init(){
+  BUILDER.WriteString("#!/bin/bash\n")
+}
+
+func PushCommand(command string){
+  if strings.Contains(command, "send-keys") {
+    BUILDER.WriteString("sleep 0.1\n")
+  }
+  BUILDER.WriteString(command + "\n")
+}
+
+func GenerateShell(sessionName string, path string) {
   scriptPath := fmt.Sprintf("tmuxcraft_%s.sh", sessionName)
-  err = os.WriteFile(scriptPath, []byte(scriptContent), 0755)
+  storePath := filepath.Join(path, scriptPath)
+  err := os.WriteFile(storePath, []byte(BUILDER.String()), 0755)
   if err != nil {
     fmt.Println("Error writing shell script:", err)
     return
