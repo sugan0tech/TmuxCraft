@@ -21,14 +21,25 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Build
+      - name: Build for multiple platforms
         run: |
-          go build -o tmuxcraft ./cmd/tmuxcraft/main.go
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -o dist/tmuxcraft-linux-amd64 ./cmd/tmuxcraft/main.go
+          GOOS=darwin GOARCH=amd64 go build -o dist/tmuxcraft-darwin-amd64 ./cmd/tmuxcraft/main.go
+          GOOS=darwin GOARCH=arm64 go build -o dist/tmuxcraft-darwin-arm64 ./cmd/tmuxcraft/main.go
+          GOOS=windows GOARCH=amd64 go build -o dist/tmuxcraft-windows-amd64.exe ./cmd/tmuxcraft/main.go
+
+      - name: Compress binaries
+        run: |
+          zip dist/tmuxcraft-linux-amd64.zip dist/tmuxcraft-linux-amd64
+          zip dist/tmuxcraft-darwin-amd64.zip dist/tmuxcraft-darwin-amd64
+          zip dist/tmuxcraft-darwin-arm64.zip dist/tmuxcraft-darwin-arm64
+          zip dist/tmuxcraft-windows-amd64.zip dist/tmuxcraft-windows-amd64.exe
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: tmuxcraft
+          files: |
+            dist/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
