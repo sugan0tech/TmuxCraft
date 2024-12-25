@@ -24,17 +24,17 @@ jobs:
       - name: Build for multiple platforms
         run: |
           mkdir -p dist
-          GOOS=linux GOARCH=amd64 go build -o dist/tmuxcraft-linux-amd64 ./cmd/tmuxcraft/main.go
-          GOOS=darwin GOARCH=amd64 go build -o dist/tmuxcraft-darwin-amd64 ./cmd/tmuxcraft/main.go
-          GOOS=darwin GOARCH=arm64 go build -o dist/tmuxcraft-darwin-arm64 ./cmd/tmuxcraft/main.go
-          GOOS=windows GOARCH=amd64 go build -o dist/tmuxcraft-windows-amd64.exe ./cmd/tmuxcraft/main.go
+          GOOS=linux GOARCH=amd64 go build -o dist/tmuxcraft ./cmd/tmuxcraft/main.go
+          GOOS=darwin GOARCH=amd64 go build -o dist/tmuxcraft ./cmd/tmuxcraft/main.go
+          GOOS=darwin GOARCH=arm64 go build -o dist/tmuxcraft ./cmd/tmuxcraft/main.go
+          GOOS=windows GOARCH=amd64 go build -o dist/tmuxcraft.exe ./cmd/tmuxcraft/main.go
 
       - name: Compress binaries
         run: |
-          zip dist/tmuxcraft-linux-amd64.zip dist/tmuxcraft-linux-amd64
-          zip dist/tmuxcraft-darwin-amd64.zip dist/tmuxcraft-darwin-amd64
-          zip dist/tmuxcraft-darwin-arm64.zip dist/tmuxcraft-darwin-arm64
-          zip dist/tmuxcraft-windows-amd64.zip dist/tmuxcraft-windows-amd64.exe
+          zip dist/tmuxcraft-linux-amd64.zip dist/tmuxcraft
+          zip dist/tmuxcraft-darwin-amd64.zip dist/tmuxcraft
+          zip dist/tmuxcraft-darwin-arm64.zip dist/tmuxcraft
+          zip dist/tmuxcraft-windows-amd64.zip dist/tmuxcraft.exe
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
